@@ -10,8 +10,10 @@ pipeline {
         }
         stage('Run Python App') {
             steps {
-                // Runs the container, mounts the workspace, and executes the app
-                sh 'docker run --rm -v $(pwd):/app -w /app python-app:latest python app.py'
+                    dir('my-first-pipeline') {
+                    // Runs the container, mounts the workspace, and executes the app
+                    sh 'docker run --rm -v $(pwd):/app -w /app python-app:latest python app.py'
+                }
             }
         }
     }

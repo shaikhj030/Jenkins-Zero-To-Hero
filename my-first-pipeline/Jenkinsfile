@@ -9,12 +9,10 @@ pipeline {
             }
         }
     }
-  }
-  stages {
-      stage('Test') {
-         steps {
+    stage('Test') {
+        steps {
               sh 'node --version'
-         }
-      }
+        }
+    }
   }
 }

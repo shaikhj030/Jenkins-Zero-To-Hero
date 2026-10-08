@@ -6,31 +6,49 @@ pipeline {
         }
     }
     stages {
-
-        stage('checkout and install dependencies') {
-              checkout scm
-              dir('Node_jenkins_docker-app') {
-                sh 'apt-get update -y && apt-get install -y npm'
+         stage('checkout and install dependencies') {
+              steps {
+                        checkout scm
+                    dir('Node_jenkins_docker-app') {
+                        sh 'apt-get update -y && apt-get install -y npm'
+                    }
+              }
+         }
+         stage('Build') {
+              steps {
+                    sh 'cd Node_jenkins_docker-app && npm install'
               }
         }
-        stage('Build') {
-            sh 'cd Node_jenkins_docker-app && npm install'
-        }
         stage('Test') {
-            sh 'cd Node_jenkins_docker-app && npm test'
+            steps {
+                  sh 'cd Node_jenkins_docker-app && npm test'
+            }
         }
         stage('Deploy') {
-            sh 'cd Node_jenkins_docker-app && node app.js &'
+            steps {
+                sh 'cd Node_jenkins_docker-app && node app.js &'
+            }
         }
         stage('Build Docker Image') {
-            sh 'cd Node_jenkins_docker-app && docker build -t node-jenkins-docker-app .'
+            steps {
+                sh 'cd Node_jenkins_docker-app && docker build -t node-jenkins-docker-app .'
+            }
         }
         stage('Push Docker Image') {
-            withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'dockerhubuser', passwordVariable: 'dockerhubpass')]) {
-                sh 'echo $dockerhubpass | docker login -u $dockerhubuser --password-stdin'
-                sh 'docker tag node-jenkins-docker-app $dockerhubuser/node-jenkins-docker-app:latest'
-                sh 'docker push $dockerhubuser/node-jenkins-docker-app:latest'
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'dockerhubuser', passwordVariable: 'dockerhubpass')]) {
+                        sh 'echo $dockerhubpass | docker login -u $dockerhubuser --password-stdin'
+                        sh 'docker tag node-jenkins-docker-app $dockerhubuser/node-jenkins-docker-app:latest'
+                        sh 'docker push $dockerhubuser/node-jenkins-docker-app:latest'
+                }
             }
+        }
+    }
+    post {
+        always {
+        echo '=== Pipeline Finished ==='
+            echo 'Cleaning up the test workspace files...'
+            deleteDir() // Native Jenkins command to wipe the workspace folder clean
         }
     }
 }

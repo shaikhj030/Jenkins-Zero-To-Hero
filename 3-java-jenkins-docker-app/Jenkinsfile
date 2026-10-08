@@ -6,6 +6,12 @@ pipeline {
         }
     }
     stages {
+        stage('Checkout Source Code') {
+            steps {
+                // 1. This clones your GitHub repository into the container workspace
+                checkout scm 
+            }
+        }
         stage('Build') {
             steps {
                 sh 'apt update -y && apt install maven -y'

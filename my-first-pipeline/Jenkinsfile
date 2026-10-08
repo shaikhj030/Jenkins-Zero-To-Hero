@@ -1,9 +1,9 @@
 pipeline {
   agent {
-    docker { 
-      image 'node:16-alpine' 
-      label 'docker-enabled-node' // Specifies which Jenkins agent runs the container
-    }
+        docker { 
+             image 'node:16-alpine' 
+             label 'docker-enabled-node' // Specifies which Jenkins agent runs the container
+        }
   }
   stages {
     stage('Test') {

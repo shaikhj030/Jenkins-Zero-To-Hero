@@ -16,23 +16,17 @@ pipeline {
         stage('Build') {
             steps {
                 checkout scm
-                sh 'apt update -y && apt install maven -y'
-                sh 'mvn clean package'
+                dir('3-java-jenkins-docker-app') {
+                    sh 'apt update -y && apt install maven -y'
+                    sh 'mvn clean package'
+                }
             }
         }
         stage('Test') {
             steps {
-                sh 'mvn test'
-            }
-        }
-        stage('Docker Build') {
-            steps {
-                sh 'docker build -t java-jenkins-docker:latest .'
-            }
-        }
-        stage('Docker Run') {
-            steps {
-                sh 'docker run --rm java-jenkins-docker:latest'
+                dir('3-java-jenkins-docker-app') {
+                    sh 'mvn test'
+                }
             }
         }        
     }

@@ -23,7 +23,7 @@ pipeline {
         }
         stage('Build and push'){
             steps {
-                dockerloginfile($imgname)
+                dockerloginfile(imgname)
             }
         }
     }

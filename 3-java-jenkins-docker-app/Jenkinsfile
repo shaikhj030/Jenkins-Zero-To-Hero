@@ -6,14 +6,16 @@ pipeline {
         }
     }
     stages {
-        stage('Checkout Source Code') {
+        stage('Debug Layout') {
             steps {
-                // 1. This clones your GitHub repository into the container workspace
-                checkout scm 
+                    checkout scm
+                    // Prints the current files inside the Jenkins console log
+                    sh 'ls -la' 
             }
         }
         stage('Build') {
             steps {
+                checkout scm
                 sh 'apt update -y && apt install maven -y'
                 sh 'mvn clean package'
             }

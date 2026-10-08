@@ -23,7 +23,9 @@ pipeline {
         }
         stage('Build and push'){
             steps {
-                dockerloginfile(imgname)
+                dir('my-first-pipeline') {
+                    dockerloginfile(imgname)
+                }
             }
         }
     }

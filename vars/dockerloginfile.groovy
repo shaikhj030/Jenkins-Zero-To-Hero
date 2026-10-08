@@ -4,7 +4,7 @@ def call(String imgname) {
                sh '''
                echo $dockerhubpass | docker login -u $dockerhubuser --password-stdin
                docker build -t ${imgname} .
-               docker push ${imgname}
+               docker push $dockerhubuser/${imgname}
                '''
         }
     }

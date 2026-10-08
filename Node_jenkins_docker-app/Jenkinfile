@@ -1,54 +1,66 @@
 pipeline {
-    agent {
-        docker {
-            image 'node:20-alpine'
-            args '-u root'
-        }
-    }
+    agent none // Allows us to pick different environments for different stages
+
     stages {
-         stage('checkout and install dependencies') {
-              steps {
-                        checkout scm
-                    dir('Node_jenkins_docker-app') {
-                        sh 'apt-get update -y && apt-get install -y npm'
-                    }
-              }
-         }
-         stage('Build') {
-              steps {
-                    sh 'cd Node_jenkins_docker-app && npm install'
-              }
-        }
-        stage('Test') {
+        stage('Checkout & Setup') {
+            agent any // Runs on the host machine to fetch code
             steps {
-                  sh 'cd Node_jenkins_docker-app && npm test'
+                checkout scm
+                // Verifies files are downloaded
+                sh 'ls -la' 
             }
         }
-        stage('Deploy') {
+
+        stage('Build & Test') {
+            agent {
+                docker {
+                    image 'node:20-alpine'
+                }
+            }
             steps {
-                sh 'cd Node_jenkins_docker-app && node app.js &'
+                dir('Node_jenkins_docker-app') {
+                    echo '=== Installing Dependencies ==='
+                    sh 'npm install'
+                    
+                    echo '=== Running Tests ==='
+                    sh 'npm test'
+                }
             }
         }
+
         stage('Build Docker Image') {
+            agent any // Must run on the host machine to access the Docker daemon
             steps {
-                sh 'cd Node_jenkins_docker-app && docker build -t node-jenkins-docker-app .'
+                dir('Node_jenkins_docker-app') {
+                    echo '=== Building Custom Docker Image ==='
+                    sh 'docker build -t node-jenkins-docker-app .'
+                }
             }
         }
+
         stage('Push Docker Image') {
+            agent any // Must run on the host machine
             steps {
+                echo '=== Pushing to Docker Hub ==='
                 withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'dockerhubuser', passwordVariable: 'dockerhubpass')]) {
-                        sh 'echo $dockerhubpass | docker login -u $dockerhubuser --password-stdin'
-                        sh 'docker tag node-jenkins-docker-app $dockerhubuser/node-jenkins-docker-app:latest'
-                        sh 'docker push $dockerhubuser/node-jenkins-docker-app:latest'
+                    sh 'echo "$dockerhubpass" | docker login -u "$dockerhubuser" --password-stdin'
+                    sh "docker tag node-jenkins-docker-app \$dockerhubuser/node-jenkins-docker-app:latest"
+                    sh "docker push \$dockerhubuser/node-jenkins-docker-app:latest"
                 }
             }
         }
     }
+
     post {
         always {
-        echo '=== Pipeline Finished ==='
-            echo 'Cleaning up the test workspace files...'
-            deleteDir() // Native Jenkins command to wipe the workspace folder clean
+            // Because we used 'agent none' at top level, we allocate a node for post-cleanup
+            node('') {
+                echo '=== Pipeline Finished, Cleaning up Workspace ==='
+                deleteDir() 
+                
+                echo '=== Cleaning up local Docker images to save space ==='
+                sh 'docker image prune -f'
+            }
         }
     }
 }

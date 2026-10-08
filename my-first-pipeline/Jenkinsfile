@@ -3,10 +3,15 @@ pipeline {
   stages {
     stage('Build and test') {
         agent {
-            dockerContainer { 
+            docker { 
               image 'node:16-alpine'
               // Reuses the existing workspace on the host machine
+              reuseNode true
             }
+        }
+        steps {
+          // Add your build commands here
+                sh 'npm install'
         }
     }
     stage('Test') {

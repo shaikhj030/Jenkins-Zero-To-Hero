@@ -1,10 +1,15 @@
+@Library('sharedlib') _
+
 pipeline {
     agent any 
+    environment {
+        imgname = 'python-app:latest'
+    }
     stages {
         stage('Build python images') {
             steps {
                dir('my-first-pipeline') {
-                    sh 'docker build -t python-app:latest .' 
+                    sh 'docker build -t ${imgname} .' 
                }
             }
         }
@@ -12,8 +17,13 @@ pipeline {
             steps {
                     dir('my-first-pipeline') {
                     // Runs the container, mounts the workspace, and executes the app
-                    sh 'docker run --rm -v $(pwd):/app -w /app python-app:latest python app.py'
+                    sh 'docker run --rm -v $(pwd):/app -w /app ${imgname} python app.py'
                 }
+            }
+        }
+        stage('Build and push'){
+            steps {
+                dockerloginfile($imgname)
             }
         }
     }

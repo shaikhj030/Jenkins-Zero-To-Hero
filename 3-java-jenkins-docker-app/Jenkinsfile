@@ -6,13 +6,6 @@ pipeline {
         }
     }
     stages {
-        stage('Debug Layout') {
-            steps {
-                    checkout scm
-                    // Prints the current files inside the Jenkins console log
-                    sh 'ls -la' 
-            }
-        }
         stage('Build') {
             steps {
                 checkout scm

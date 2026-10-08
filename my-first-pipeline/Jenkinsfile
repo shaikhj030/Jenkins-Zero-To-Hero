@@ -6,6 +6,7 @@ pipeline {
             dockerContainer { 
               image 'python-app:latest'
               // Reuses the existing workspace on the host machine
+              args '-t -i'
             }
         }
         steps {

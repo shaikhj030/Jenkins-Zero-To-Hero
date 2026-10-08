@@ -6,14 +6,15 @@ pipeline {
             dockerContainer { 
               image 'node:16-alpine'
               // Reuses the existing workspace on the host machine
-              reuseNode true
             }
         }
     }
-    stage('Test') {
-      steps {
-        sh 'node --version'
+  }
+  stages {
+      stage('Test') {
+         steps {
+              sh 'node --version'
+         }
       }
-    }
   }
 }

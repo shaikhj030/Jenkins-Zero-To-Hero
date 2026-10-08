@@ -1,11 +1,14 @@
 pipeline {
     agent {
-        docker { image 'eclipse-temurin:21-jdk' }
+        docker { 
+            image 'eclipse-temurin:21-jdk'
+            args '-u root'
+        }
     }
     stages {
         stage('Build') {
             steps {
-                sh 'sudo apt update && sudo apt install maven'
+                sh 'apt update && apt install maven'
                 sh 'mvn clean package'
             }
         }

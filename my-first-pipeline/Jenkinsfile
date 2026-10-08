@@ -3,7 +3,7 @@ pipeline {
   stages {
     stage('Build and test') {
         agent {
-            docker { 
+            dockerContainer { 
               image 'node:16-alpine'
               // Reuses the existing workspace on the host machine
               reuseNode true

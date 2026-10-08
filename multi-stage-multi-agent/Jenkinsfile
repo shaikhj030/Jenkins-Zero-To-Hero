@@ -17,11 +17,11 @@ pipeline {
         sh 'node --version'
       }
     }
-    post {
-        success {
+  }
+  post {
+    success {
             echo 'Tests passed! Cleaning up Docker images...'
             sh 'docker image prune -f'
-        }
     }
   }
 }

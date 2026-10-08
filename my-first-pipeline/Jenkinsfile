@@ -1,14 +1,13 @@
 pipeline {
-  agent any // Runs the pipeline workspace on the local Jenkins server
-  stages {
-    stage('Build and test') {
-        agent {
-            dockerContainer { 
-              sh 'docker pull python-app:latest'
-              // Reuses the existing workspace on the host machine
-              sh 'docker run --rm -v $(pwd):/app -w /app python-app:latest python3 --version'
+    agent any 
+
+    stages {
+        stage('Run Python App') {
+            steps {
+                sh 'docker build -t python-app:latest .'
+                // Runs the container, mounts the workspace, and executes the app
+                sh 'docker run --rm -v $(pwd):/app -w /app python-app:latest'
             }
         }
     }
-  }
 }

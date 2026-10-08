@@ -4,19 +4,10 @@ pipeline {
     stage('Build and test') {
         agent {
             dockerContainer { 
-              image 'python-app:latest'
+              sh 'docker pull python-app:latest'
               // Reuses the existing workspace on the host machine
-              args '-t -i'
+              sh 'docker run --rm -v $(pwd):/app -w /app python-app:latest python3 --version'
             }
-        }
-        steps {
-          // Add your build commands here
-                sh 'echo "python docker running"'
-        }
-    }
-    stage('Test') {
-        steps {
-              sh 'python3 --version'
         }
     }
   }

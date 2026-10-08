@@ -19,9 +19,20 @@ pipeline {
     }
   }
   post {
-    success {
-            echo 'Tests passed! Cleaning up Docker images...'
-            sh 'docker image prune -f'
-    }
+    // Allocate an agent specifically for this post-action
+    // This runs no matter what (Success, Failure, or Aborted)
+        always {
+             node {
+                echo 'Cleaning up test containers...'
+                // The '|| true' ensures the pipeline doesn't crash if the container was never created
+                sh 'docker image prune -f'
+             }
+        }
+        success {
+             node {
+                  echo 'Tests passed! Cleaning up Docker images...'
+                  sh 'docker image prune -f'
+             }
+        }
   }
 }

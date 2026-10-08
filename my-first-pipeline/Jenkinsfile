@@ -1,12 +1,17 @@
 pipeline {
     agent any 
-
     stages {
+        stage('Build python images') {
+            steps {
+               dir('my-first-pipeline') {
+                    sh 'docker build -t python-app:latest .' 
+               }
+            }
+        }
         stage('Run Python App') {
             steps {
-                sh 'docker build -t python-app:latest .'
                 // Runs the container, mounts the workspace, and executes the app
-                sh 'docker run --rm -v $(pwd):/app -w /app python-app:latest'
+                sh 'docker run --rm -v $(pwd):/app -w /app python-app:latest python app.py'
             }
         }
     }

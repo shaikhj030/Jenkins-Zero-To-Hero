@@ -3,13 +3,13 @@
 pipeline {
     agent any 
     environment {
-        imgname = 'python-app:${env.BUILD_ID}'
+        imgname = 'python-app'
     }
     stages {
         stage('Build python images') {
             steps {
                dir('my-first-pipeline') {
-                    sh 'docker build -t ${imgname} .' 
+                    sh 'docker build -t ${imgname}:${env.BUILD_ID} .' 
                }
             }
         }

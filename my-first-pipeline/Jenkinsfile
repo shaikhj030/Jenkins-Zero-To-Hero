@@ -3,7 +3,7 @@
 pipeline {
     agent any 
     environment {
-        imgname = 'python-app:latest'
+        imgname = 'python-app:${BUILD_ID}'
     }
     stages {
         stage('Build python images') {
@@ -27,6 +27,11 @@ pipeline {
                     dockerloginfile(imgname)
                 }
             }
+        }
+    }
+    Post {
+        always {
+            cleandockerimages()
         }
     }
 }

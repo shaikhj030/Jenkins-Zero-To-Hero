@@ -4,6 +4,33 @@ Set up a multi stage jenkins pipeline where each stage is run on a unique agent.
 or application that has conflicting dependencies.
 
 
+High-Level Summary
+
+This is a Declarative Pipeline utilizing a distributed architecture to process Back-end and Front-end stages in completely isolated runtime environments. It leverages agent none at the global level, spinning up a Maven/Java 11 Docker container for the back-end and a Node.js 16 Docker container for the front-end. Finally, it uses dynamic post-action worker blocks (node('')) to perform systemic cleanup commands directly on the host machine.
+
+📂 Stage-by-Stage Breakdown
+
+
+0. Global Strategy (agent none)
+
+• Decoupled Environments: By declaring agent none at the absolute top, the pipeline is banned from reserving a single machine for the entire run. Instead, it forces each stage to demand its own specific environment, which is perfect for modern full-stack web applications.
+
+1. stage('Back-end')
+
+• Isolated Environment: Jenkins provisions a workspace inside a maven:3.8.1-adoptopenjdk-11 Docker container.
+• Execution: Runs sh 'mvn --version' to verify that Java 11 and the Maven compilation toolchain are ready to build the back-end services.
+
+2. stage('Front-end')
+
+• Isolated Environment: As soon as the back-end finishes, Jenkins leaves that container and spins up an lightweight node:16-alpine Linux container.
+• Execution: Runs sh 'node --version' to verify that the Node package ecosystem is ready to build or compile user interface assets (like React, Angular, or Vue).
+
+3. Execution Lifecycle (post block)
+
+Because the global pipeline has no default runner machine (agent none), you have explicitly wrapped your notification and housekeeping commands inside node('') blocks. This tells Jenkins to quickly grab any available host system executor to run your cleanup.
+• always Block: No matter if your code compiles perfectly or completely crashes, it runs docker image prune -f to clear dangling intermediate build layers from the system engine.
+• success Block: If all stages pass without an error, it intercepts the workflow, echoes a success message, and runs a secondary sweep of the system cache to ensure your runner doesn't run out of storage space.
+
  Jenkins Pipeline (Declarative)
 
 In Jenkins, you can use the post block with the success condition to handle the cleanup.

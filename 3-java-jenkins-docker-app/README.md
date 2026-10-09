@@ -167,3 +167,28 @@ You need to have the following installed:
 ## 📜 License
 
 This project is released under the MIT License.
+
+
+High-Level Summary
+
+This is a Declarative Pipeline that automates the lifecycle of a Java application inside an isolated Docker container agent. It utilizes an official Eclipse Temurin JDK 21 container as its execution environment, checks out your source code, moves into a specific project subdirectory, updates system packages to install Apache Maven, and sequentially compiles, packages, and tests the Java application.
+
+📂 Stage-by-Stage Breakdown
+
+
+0. Runtime Environment Configuration
+
+• agent { docker { ... } }: Instead of running commands directly on the host Jenkins server, this pipeline forces all stages to execute inside a fresh Docker container using the eclipse-temurin:21-jdk image. This ensures your build has access to Java 21 without needing it installed on the host machine.
+• args '-u root': Launches the container with administrative (root) user privileges, giving the pipeline permission to install system software and read/write workspace files seamlessly.
+
+1. stage('Build')
+
+• checkout scm: Automatically pulls the latest source code from your connected Git repository into the workspace.
+• dir('3-java-jenkins-docker-app'): Switches the execution path into your specific Java project subdirectory where your pom.xml and source files live.
+• sh 'apt update -y && apt install maven -y': Updates the container's Debian/Ubuntu package manager and installs Apache Maven dynamically, preparing the environment to build Java code.
+• sh 'mvn clean package': Deletes any older build artifacts (clean) and compiles the Java source code to generate your final application package (like a .jar or .war file).
+
+2. stage('Test')
+
+• Isolated Testing: Still inside the project subdirectory (3-java-jenkins-docker-app), this stage runs sh 'mvn test'. This executes your application's unit tests (e.g., JUnit or TestNG) to guarantee that the new code changes haven't broken any existing business logic before completion.
+

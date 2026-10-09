@@ -1,5 +1,36 @@
 # A simple jenkins pipeline to verify if the docker slave configuration is working as expected.#
 
+High-Level Summary
+
+This is a Declarative Pipeline designed to automate the lifecycle of a Python application inside a Docker container. It imports a Jenkins Shared Library (sharedlib), changes into a specific project subdirectory (my-first-pipeline), and sequentially builds, tests, and pushes a Docker image to Docker Hub using dynamic tagging based on the unique Jenkins Build ID. It also includes an automated cleanup phase to protect your server's disk space.
+
+
+Stage-by-Stage Breakdown
+
+
+0. Initialization & Global Setup
+
+• @Library('sharedlib') _: Imports your remote global shared library. The underscore (_) automatically pulls in all custom Groovy steps (vars/) so they can be called directly in this script.
+• environment { imgname = 'python-app' }: Defines a pipeline-wide variable named imgname. This makes it incredibly easy to rename your application in the future without changing multiple lines of code.
+
+1. stage('Build python images')
+
+• dir('my-first-pipeline'): Switches the execution path into your project folder where your application code and Dockerfile live.
+• sh "docker build...": Builds a local Docker image. By using double quotes ("), Jenkins evaluates the variables to tag the image dynamically (e.g., python-app:12).
+
+2. stage('Run Python App')
+
+• Testing in Isolation: This stage acts as an integration or unit testing step. It spins up the freshly built container (docker run --rm), mounts your local Jenkins folder directly into the container (-v \$(pwd):/app), and forces the container to execute python app.py.
+• Escaped Syntax: The \$(pwd) uses an escaped backslash so that Linux (not Jenkins Groovy) handles the directory path resolution dynamically.
+
+3. stage('Build and push')
+
+• Shared Library Delegation: Instead of writing complex, messy shell strings for authentication here, you call your custom step dockerloginfile(imgname). This passes the application name into your shared library, which handles logging into Docker Hub securely via credentials, tags the image with your Docker Hub username, and pushes it to the cloud.
+
+4. post { always { cleandockerimages() } }
+
+• Automated Housekeeping: No matter if your build succeeds, fails, or is aborted, the always block intercepts the final execution path and triggers another custom shared library step called cleandockerimages(). This sweeps your Jenkins runner disk and safely deletes (docker rmi) the cached local images so your server never runs out of storage space.
+
 1. The Foundation: Shared Library Setup
 
 • What you asked: You wanted to know how to set up a Jenkins Shared Library.

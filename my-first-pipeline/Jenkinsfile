@@ -3,7 +3,7 @@
 pipeline {
     agent any 
     environment {
-        imgname = 'python-app:${BUILD_ID}'
+        imgname = 'python-app:${env.BUILD_ID}'
     }
     stages {
         stage('Build python images') {

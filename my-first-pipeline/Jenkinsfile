@@ -17,7 +17,7 @@ pipeline {
             steps {
                     dir('my-first-pipeline') {
                     // Runs the container, mounts the workspace, and executes the app
-                    sh 'docker run --rm -v $(pwd):/app -w /app ${imgname} python app.py'
+                    sh 'docker run --rm -v $(pwd):/app -w /app ${imgname}:${env.BUILD_ID} python app.py'
                 }
             }
         }

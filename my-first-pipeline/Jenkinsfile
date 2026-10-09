@@ -9,7 +9,7 @@ pipeline {
         stage('Build python images') {
             steps {
                dir('my-first-pipeline') {
-                    sh 'docker build -t ${imgname}:${env.BUILD_ID} .' 
+                    sh "docker build -t ${imgname}:${env.BUILD_ID} ."
                }
             }
         }
@@ -17,7 +17,7 @@ pipeline {
             steps {
                     dir('my-first-pipeline') {
                     // Runs the container, mounts the workspace, and executes the app
-                    sh 'docker run --rm -v $(pwd):/app -w /app ${imgname}:${env.BUILD_ID} python app.py'
+                    sh "docker run --rm -v $(pwd):/app -w /app ${imgname}:${env.BUILD_ID} python app.py"
                 }
             }
         }
